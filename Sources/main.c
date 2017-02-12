@@ -37,6 +37,7 @@
 // Standard C Included Files
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 // SDK Included Files
 #include "fsl_sim_hal.h"
@@ -55,8 +56,7 @@
 #define ADC_CHANNEL_3           3U
 
 /*==================[internal data declaration]==============================*/
-int16_t TEST_ADC = false;
-int cuenta = 0;
+bool flagTestAdc = false;
 uint16_t result;
 
 /*==================[internal functions declaration]=========================*/
@@ -139,7 +139,7 @@ int main(void)
 
     while(1)
     {
-    	if(TEST_ADC == true)
+    	if(flagTestAdc == true)
     	{
     		AdcChCfg.chnIdx = (adc16_chn_t)ADC_CHANNEL_3;
     		AdcChCfg.convCompletedIntEnable = true;
@@ -148,7 +148,7 @@ int main(void)
     		sprintf(Buffer,"luz= %d\r",result);
     		LPSCI_HAL_SendDataPolling(UART0, (uint8_t *)"         \r",10);
     		LPSCI_HAL_SendDataPolling(UART0, (uint8_t *)Buffer, strlen(Buffer));
-    		TEST_ADC = false;
+    		flagTestAdc = false;
     	}
     }
 }
@@ -161,7 +161,7 @@ void ADC0_IRQHandler(void)
 void PIT_IRQHandler(void)
 {
 	PIT_HAL_ClearIntFlag(PIT, 1);
-	TEST_ADC = true;
+	flagTestAdc = true;
 }
 
 /*==================[end of file]============================================*/
