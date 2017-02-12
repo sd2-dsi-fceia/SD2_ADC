@@ -163,3 +163,5 @@ void PIT_IRQHandler(void)
 	PIT_HAL_ClearIntFlag(PIT, 1);
 	TEST_ADC = true;
 }
+
+/*==================[end of file]============================================*/
