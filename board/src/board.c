@@ -42,7 +42,6 @@
 #include "fsl_clock_MKL46Z4.h"
 #include "fsl_i2c_hal.h"
 #include "fsl_lpsci_hal.h"
-#include "mma8451.h"
 
 /*==================[macros and definitions]=================================*/
 
@@ -89,8 +88,6 @@
 /*==================[external functions definition]==========================*/
 void board_init(void)
 {
-    int32_t busClock;
-
     /* Activación de clock para los puertos utilizados */
     SIM_HAL_EnableClock(SIM, kSimClockGatePortA);
     SIM_HAL_EnableClock(SIM, kSimClockGatePortC);
@@ -121,31 +118,6 @@ void board_init(void)
     GPIO_HAL_SetPinDir(SW3_GPIO, SW3_PIN, kGpioDigitalInput);
     PORT_HAL_SetPullCmd(SW3_PORT, SW3_PIN, true);
     PORT_HAL_SetPullMode(SW3_PORT, SW3_PIN, kPortPullUp);
-
-    /* =========== I2C =================== */
-
-	/* seleccion función alternativa 5 (I2C) */
-	PORT_HAL_SetMuxMode(PORTE, 24,kPortMuxAlt5);
-
-	/* seleccion función alternativa 5 (I2C) */
-	PORT_HAL_SetMuxMode(PORTE, 25,kPortMuxAlt5);
-
-	/* activa clock para I2C */
-	SIM_HAL_EnableClock(SIM, kSimClockGateI2c0);
-
-	/* inicializa el I2C */
-	I2C_HAL_Init(I2C0);
-
-	/* configura baudrate */
-	I2C_HAL_SetBaudRate(I2C0, SystemCoreClock, 100, NULL);
-
-	/* activa el I2C */
-	I2C_HAL_Enable(I2C0);
-
-	/* =========== MMA8451 ================ */
-
-    mma8451_init();
-
 
     /* =========== UART ================ */
 
