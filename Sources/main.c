@@ -56,37 +56,16 @@
 #define ADC_CHANNEL_3           3U
 
 /*==================[internal data declaration]==============================*/
-bool flagTestAdc = false;
 uint16_t result;
 
 /*==================[internal functions declaration]=========================*/
-void UART_Init(void);
-void PIT_Init(void);
 void ADC_Init(void);
-uint8_t ADC_Calibration(ADC_Type* baseAddr);
 
 /*==================[internal data definition]===============================*/
 
 /*==================[external data definition]===============================*/
 
 /*==================[internal functions definition]==========================*/
-void UART_Init(void)
-{
-	// Enable the UART transmitter and receiver
-	LPSCI_HAL_SetIntMode(UART0, kLpsciIntRxDataRegFull, true);
-	/* habilita transmisor y receptor */
-	LPSCI_HAL_EnableTransmitter(UART0);
-}
-
-void PIT_Init(void)
-{
-	SIM_HAL_EnableClock(SIM, kSimClockGatePit0);
-	PIT_HAL_Enable(PIT);
-	PIT_HAL_SetTimerPeriodByCount(PIT, 1, 0xFFFFF);
-	PIT_HAL_SetIntCmd(PIT, 1, true);
-	PIT_HAL_SetTimerRunInDebugCmd(PIT, false);
-	PIT_HAL_StartTimer(PIT, 1);
-}
 
 void ADC_Init(void)
 {
@@ -109,59 +88,35 @@ void ADC_Init(void)
 	ADC16_HAL_ConfigConverter(ADC0, &adcUserConfig);
 }
 
+void ADC_IniciarConv(void)
+{
+	adc16_chn_config_t AdcChCfg;
+	AdcChCfg.chnIdx = (adc16_chn_t)ADC_CHANNEL_3;
+	AdcChCfg.convCompletedIntEnable = false;
+	AdcChCfg.diffConvEnable = false;
+	ADC16_HAL_ConfigChn(ADC0, ADC_SC1A_POINTER, &AdcChCfg);
+}
+
 /*==================[external functions definition]==========================*/
 
 int main(void)
 {
-	char Buffer[10];
-	adc16_chn_config_t AdcChCfg;
-
 	// Se inicializan funciones de la placa
 	board_init();
 
-	ledRojo_on();
-
 	// Se inicializa el ADC
 	ADC_Init();
-
-	// Se inicializa el UART0
-	UART_Init();
-
-	// Se inicializa el timer PIT
-	PIT_Init();
-
-    // Se habilitan interrupciones de ADC
-	NVIC_ClearPendingIRQ(ADC0_IRQn);
-    NVIC_EnableIRQ(ADC0_IRQn);
-
-    NVIC_ClearPendingIRQ(PIT_IRQn);
-    NVIC_EnableIRQ(PIT_IRQn);
+	// Se inicializa la conversion
+	ADC_IniciarConv();
 
     while(1)
     {
-    	if(flagTestAdc == true)
+    	if(ADC16_HAL_GetChnConvCompletedFlag(ADC0, ADC_SC1A_POINTER))
     	{
-    		AdcChCfg.chnIdx = (adc16_chn_t)ADC_CHANNEL_3;
-    		AdcChCfg.convCompletedIntEnable = true;
-    		ADC16_HAL_ConfigChn(ADC0, ADC_SC1A_POINTER, &AdcChCfg);
-
-    		sprintf(Buffer,"luz= %d\r",result);
-    		LPSCI_HAL_SendDataPolling(UART0, (uint8_t *)"         \r",10);
-    		LPSCI_HAL_SendDataPolling(UART0, (uint8_t *)Buffer, strlen(Buffer));
-    		flagTestAdc = false;
+    		result = ADC16_HAL_GetChnConvValue(ADC0, ADC_SC1A_POINTER );
+    		ADC_IniciarConv();
     	}
     }
-}
-
-void ADC0_IRQHandler(void)
-{
-	result = ADC16_HAL_GetChnConvValue(ADC0, ADC_SC1A_POINTER );
-}
-
-void PIT_IRQHandler(void)
-{
-	PIT_HAL_ClearIntFlag(PIT, 1);
-	flagTestAdc = true;
 }
 
 /*==================[end of file]============================================*/
