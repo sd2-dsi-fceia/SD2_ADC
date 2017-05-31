@@ -61,6 +61,9 @@
 #define SW3_GPIO            GPIOC
 #define SW3_PIN             12
 
+#define SENSOR_LUZ_PORT		PORTE
+#define SENSOR_LUZ_PIN		22
+
 /*==================[internal data declaration]==============================*/
 
 /*==================[internal functions declaration]=========================*/
@@ -110,7 +113,7 @@ void board_init(void)
 
     /* =========== ADC ================ */
 
-	PORT_HAL_SetMuxMode(PORTE, 22u, kPortPinDisabled);
+	PORT_HAL_SetMuxMode(SENSOR_LUZ_PORT, SENSOR_LUZ_PIN, kPortPinDisabled);
 	CLOCK_SYS_EnableAdcClock(ADC0_IDX);
 }
 
