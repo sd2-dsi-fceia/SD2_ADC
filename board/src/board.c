@@ -34,26 +34,12 @@
 
 /*==================[inclusions]=============================================*/
 #include "board.h"
-#include "MKL46Z4.h"
 #include "fsl_port_hal.h"
 #include "fsl_gpio_hal.h"
 #include "fsl_sim_hal.h"
-#include "fsl_sim_hal_MKL46Z4.h"
-#include "fsl_clock_MKL46Z4.h"
-#include "fsl_i2c_hal.h"
-#include "fsl_lpsci_hal.h"
+#include "fsl_clock_manager.h"
 
 /*==================[macros and definitions]=================================*/
-
-/* EXTAL0 PTA18 */
-#define EXTAL0_PORT   PORTA
-#define EXTAL0_PIN    18
-#define EXTAL0_PINMUX kPortPinDisabled
-
-/* XTAL0 PTA19 */
-#define XTAL0_PORT   PORTA
-#define XTAL0_PIN    19
-#define XTAL0_PINMUX kPortPinDisabled
 
 /** \brief definiciones para el Led rojo */
 #define LED_ROJO_PORT       PORTE
@@ -86,6 +72,8 @@
 /*==================[internal functions definition]==========================*/
 
 /*==================[external functions definition]==========================*/
+
+
 void board_init(void)
 {
     /* Activación de clock para los puertos utilizados */
@@ -107,6 +95,7 @@ void board_init(void)
     GPIO_HAL_SetPinDir(LED_VERDE_GPIO, LED_VERDE_PIN, kGpioDigitalOutput);
 	
 	/* =========== SW1 =================== */
+
     PORT_HAL_SetMuxMode(SW1_PORT, SW1_PIN, kPortMuxAsGpio);
     GPIO_HAL_SetPinDir(SW1_GPIO, SW1_PIN, kGpioDigitalInput);
     PORT_HAL_SetPullCmd(SW1_PORT, SW1_PIN, true);
@@ -119,37 +108,10 @@ void board_init(void)
     PORT_HAL_SetPullCmd(SW3_PORT, SW3_PIN, true);
     PORT_HAL_SetPullMode(SW3_PORT, SW3_PIN, kPortPullUp);
 
-    /* =========== UART ================ */
-
-    PORT_HAL_SetMuxMode(PORTA, 1u, kPortMuxAlt2);
-    PORT_HAL_SetMuxMode(PORTA, 2u, kPortMuxAlt2);
-
-    // LPSCI: Low Power Serial Communication Interface
-
-    /* selecciona clock de PLLFLLSEL */
-    CLOCK_HAL_SetLpsciSrc(SIM, 0, kClockLpsciSrcPllFllSel);
-
-    /* habilita clock a la UART0 (Lpsci0) */
-    SIM_HAL_EnableClock(SIM, kSimClockGateLpsci0);
-
-    /* setea baudrate */
-    LPSCI_HAL_SetBaudRate(UART0, SystemCoreClock, 115200);
-
-    /* configura 8 bits de datos */
-    LPSCI_HAL_SetBitCountPerChar(UART0, kLpsci8BitsPerChar);
-
-    /* deshabilita paridad */
-    LPSCI_HAL_SetParityMode(UART0, kLpsciParityDisabled);
-
-    /* 1 bit de stop */
-    LPSCI_HAL_SetStopBitCount(UART0, kLpsciOneStopBit);
-
     /* =========== ADC ================ */
 
-    PORT_HAL_SetMuxMode(PORTE, 22u, kPortPinDisabled);
-    CLOCK_SYS_EnableAdcClock(ADC0_IDX);
-
-
+	PORT_HAL_SetMuxMode(PORTE, 22u, kPortPinDisabled);
+	CLOCK_SYS_EnableAdcClock(ADC0_IDX);
 }
 
 int8_t pulsadorSw1_get(void)
